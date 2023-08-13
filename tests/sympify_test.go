@@ -2,7 +2,7 @@
  * @Author: flyyuan 740004544@qq.com
  * @Date: 2023-08-13 18:29:51
  * @LastEditors: flyyuan 740004544@qq.com
- * @LastEditTime: 2023-08-13 18:50:56
+ * @LastEditTime: 2023-08-13 19:02:10
  * @FilePath: /symgo/tests/sympify_test.go
  * @Description:
  */
@@ -18,7 +18,8 @@ func TestSympify(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"3 + 7", "10"}, // 假设这是正确的输出
+		{"6 - 2", "4"}, // 假设这是正确的输出
+		{"6 + 2", "8"}, // 假设这是正确的输出
 		{"invalid_expr", "Error: invalid expression"}, // 假设这是错误消息
 		// 添加更多测试用例...
 	}

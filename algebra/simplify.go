@@ -68,15 +68,60 @@ func (m Mul) Evaluate() (float64, error) {
 	return leftVal * rightVal, nil
 }
 
+type Sub struct {
+	Left  Expr
+	Right Expr
+}
+
+func (s Sub) String() string {
+	return fmt.Sprintf("(%s - %s)", s.Left, s.Right)
+}
+
+func (s Sub) Evaluate() (float64, error) {
+	leftVal, err := s.Left.Evaluate()
+	if err != nil {
+		return 0, err
+	}
+	rightVal, err := s.Right.Evaluate()
+	if err != nil {
+		return 0, err
+	}
+	return leftVal - rightVal, nil
+}
+
+type Div struct {
+	Left  Expr
+	Right Expr
+}
+
+func (d Div) String() string {
+	return fmt.Sprintf("(%s / %s)", d.Left, d.Right)
+}
+
+func (d Div) Evaluate() (float64, error) {
+	leftVal, err := d.Left.Evaluate()
+	if err != nil {
+		return 0, err
+	}
+	rightVal, err := d.Right.Evaluate()
+	if err != nil {
+		return 0, err
+	}
+	if rightVal == 0 {
+		return 0, errors.New("division by zero")
+	}
+	return leftVal / rightVal, nil
+}
+
 func isOperator(token string) bool {
-	return token == "+" || token == "*"
+	return token == "+" || token == "-" || token == "*" || token == "/"
 }
 
 func precedence(op string) int {
 	switch op {
-	case "+":
+	case "+", "-":
 		return 1
-	case "*":
+	case "*", "/":
 		return 2
 	default:
 		return 0
@@ -120,22 +165,24 @@ func Sympify(expr string) (Expr, error) {
 	for _, token := range postfix {
 		if unicode.IsDigit(rune(token[0])) {
 			stack = append(stack, Symbol(token))
-		} else if token == "+" {
+		} else {
 			if len(stack) < 2 {
 				return nil, errors.New("invalid expression")
 			}
 			right := stack[len(stack)-1]
 			left := stack[len(stack)-2]
 			stack = stack[:len(stack)-2]
-			stack = append(stack, Add{Left: left, Right: right})
-		} else if token == "*" {
-			if len(stack) < 2 {
-				return nil, errors.New("invalid expression")
+
+			switch token {
+			case "+":
+				stack = append(stack, Add{Left: left, Right: right})
+			case "-":
+				stack = append(stack, Sub{Left: left, Right: right})
+			case "*":
+				stack = append(stack, Mul{Left: left, Right: right})
+			case "/":
+				stack = append(stack, Div{Left: left, Right: right})
 			}
-			right := stack[len(stack)-1]
-			left := stack[len(stack)-2]
-			stack = stack[:len(stack)-2]
-			stack = append(stack, Mul{Left: left, Right: right})
 		}
 	}
 
